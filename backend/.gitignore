@@ -1,0 +1,53 @@
+# ==============================================================================
+# Git Ignore: Backend Python & Database
+# ==============================================================================
+
+# Credentials & Environment
+.env
+.env.*
+*.env
+!.env.example
+!.env.template
+credentials.json
+credentials*.json
+client_secret*.json
+google-credentials*.json
+*.pem
+*.key
+
+# Financial Databases
+finance.db
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Imported Statements & Uploads
+imports/
+uploads/
+*.csv
+*.xlsx
+*.xls
+!sample*.csv
+!template*.csv
+
+# Python Bytecode & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+
+# Tests & Logs
+.pytest_cache/
+.coverage
+htmlcov/
+*.log

@@ -1,0 +1,165 @@
+# ==============================================================================
+# Git Ignore: FinTrack AI (Credentials, Secrets, Imports & Local Databases)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Important Credentials, Secrets & Environment Configurations
+# ------------------------------------------------------------------------------
+.env
+.env.*
+*.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+# Preserve configuration templates
+!.env.example
+!.env.template
+
+# Google OAuth, Service Accounts & API Secrets
+credentials.json
+credentials*.json
+client_secret*.json
+google-credentials*.json
+service-account*.json
+token.json
+token*.json
+*.token
+
+# Private Keys, Certificates & Keystores
+*.pem
+*.key
+*.pkcs12
+*.p12
+*.pfx
+*.crt
+*.cert
+*.keystore
+*.jks
+id_rsa*
+id_ed25519*
+
+# ------------------------------------------------------------------------------
+# 2. Financial Databases, Local Storage & State
+# ------------------------------------------------------------------------------
+# Local SQLite instances containing sensitive personal financial records
+finance.db
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+*.db-lock
+
+# Database dumps and backups
+*.sql
+*.dump
+*.bak
+
+# ------------------------------------------------------------------------------
+# 3. Imported User Data, Bank Statements & Uploads
+# ------------------------------------------------------------------------------
+# User transaction exports and personal financial statements
+imports/
+data/imports/
+uploads/
+temp/
+*.csv
+*.tsv
+*.xlsx
+*.xls
+# Allow sample template if needed in repository
+!sample*.csv
+!template*.csv
+
+# ------------------------------------------------------------------------------
+# 4. Backend / Python Artifacts & Virtual Environments
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.hypothesis/
+.tox/
+.nox/
+
+# ------------------------------------------------------------------------------
+# 5. Frontend / Node & Build Artifacts
+# ------------------------------------------------------------------------------
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.vite/
+.eslintcache
+*.tsbuildinfo
+
+# ------------------------------------------------------------------------------
+# 6. Logs & Debug Output
+# ------------------------------------------------------------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ------------------------------------------------------------------------------
+# 7. Operating System & Editor Files
+# ------------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# IDEs & Editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.sln
+*.swp
+*.swo
+
+# AI / IDE Agent Temp Artifacts
+.gemini/

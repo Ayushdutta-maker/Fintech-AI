@@ -9,7 +9,7 @@ load_dotenv(BASE_DIR.parent / ".env")
 
 class Settings:
     APP_ENV: str = os.getenv("APP_ENV", "development")
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./finance.db")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://postgres@db.xivyidcovjckojhvxxyw.supabase.co:5432/postgres")
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "finance-tracker-insecure-secret-key-change-in-prod-12345")
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))

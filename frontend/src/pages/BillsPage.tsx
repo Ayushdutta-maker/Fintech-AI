@@ -161,7 +161,7 @@ export const BillsPage: React.FC = () => {
       )}
 
       {/* KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+      <div className="bills-kpi-grid">
         <div className="card" style={{ padding: '18px 22px' }}>
           <span style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
             Upcoming Obligations

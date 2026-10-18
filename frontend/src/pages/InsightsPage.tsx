@@ -186,8 +186,8 @@ export const InsightsPage: React.FC = () => {
       {isLoading ? (
         <div className="skeleton-shimmer skeleton-chart" style={{ height: '320px' }} />
       ) : (
-        <div className="card" style={{ padding: '28px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.8fr', gap: '30px', alignItems: 'center' }}>
+        <div className="card" style={{ padding: '24px' }}>
+          <div className="insights-split-grid">
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', flexWrap: 'wrap' }}>
                 <span className="badge badge-income">

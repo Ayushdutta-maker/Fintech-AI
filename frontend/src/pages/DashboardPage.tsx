@@ -454,7 +454,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       </div>
 
       {/* 4. Split Row: Recent Transactions + Budget Progress & Upcoming Bills */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '20px' }}>
+      <div className="dashboard-split-grid">
         {/* Left Column: Recent Transactions Table */}
         <div className="card">
           <div className="card-header">

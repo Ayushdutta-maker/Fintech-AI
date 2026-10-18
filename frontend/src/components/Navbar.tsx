@@ -100,7 +100,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header className="topbar">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div className="navbar-left">
         {/* Mobile menu hamburger toggle */}
         {onToggleMobileMenu && (
           <button 
@@ -115,29 +115,13 @@ export const Navbar: React.FC<NavbarProps> = ({
         )}
 
         {/* Month selector pill */}
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '8px', 
-          background: 'var(--surface-subtle)', 
-          border: '1px solid var(--border)',
-          padding: '6px 14px', 
-          borderRadius: 'var(--radius-sm)' 
-        }}>
-          <Calendar size={16} color="var(--green-600)" />
+        <div className="navbar-month-pill">
+          <Calendar size={15} color="var(--green-600)" />
           <select 
             value={selectedMonth}
             onChange={(e) => onMonthChange(e.target.value)}
             aria-label="Select report month"
-            style={{ 
-              background: 'transparent', 
-              border: 'none', 
-              fontSize: '13px', 
-              fontWeight: 700, 
-              color: 'var(--text)', 
-              outline: 'none',
-              cursor: 'pointer' 
-            }}
+            className="navbar-select"
           >
             {monthOptions.map(m => (
               <option key={m.val} value={m.val} style={{ background: 'var(--surface)', color: 'var(--text)' }}>
@@ -148,15 +132,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Currency Switcher */}
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '6px',
-          background: 'var(--surface-subtle)',
-          border: '1px solid var(--border)',
-          padding: '6px 12px',
-          borderRadius: 'var(--radius-sm)'
-        }}>
+        <div className="navbar-currency-pill">
           <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--green-600)' }}>
             {currencySymbol}
           </span>
@@ -164,15 +140,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             value={currency}
             onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
             aria-label="Select display currency"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              fontSize: '12.5px',
-              fontWeight: 700,
-              color: 'var(--text)',
-              outline: 'none',
-              cursor: 'pointer'
-            }}
+            className="navbar-select"
           >
             {currencies.map(c => (
               <option key={c} value={c} style={{ background: 'var(--surface)', color: 'var(--text)' }}>
@@ -183,7 +151,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div className="navbar-right">
         {/* Dark / Light Theme Switcher */}
         <button
           type="button"
@@ -199,21 +167,20 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </button>
 
-        {/* Export CSV button (hidden on very small screens) */}
+        {/* Export CSV button (hidden on mobile) */}
         <button 
           onClick={handleExportCsv}
-          className="btn btn-secondary" 
+          className="btn btn-secondary hide-on-mobile" 
           title="Export transactions as CSV"
-          style={{ display: 'flex' }}
         >
           <Download size={15} />
-          <span className="hide-on-mobile">Export CSV</span>
+          <span>Export CSV</span>
         </button>
 
-        {/* Add Transaction Primary CTA */}
+        {/* Add Transaction Primary CTA (hidden on mobile because mobile bottom nav has elevated + button) */}
         <button 
           onClick={onOpenAddTransaction}
-          className="btn btn-primary"
+          className="btn btn-primary hide-on-mobile"
         >
           <Plus size={16} />
           <span>Add Transaction</span>
@@ -421,11 +388,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </div>
 
-        {/* Dedicated Direct Logout Button */}
+        {/* Dedicated Direct Logout Button (Desktop only; on mobile, logout is in profile dropdown & sidebar) */}
         <button
           type="button"
           onClick={onLogout}
-          className="btn btn-secondary"
+          className="btn btn-secondary hide-on-mobile"
           title="Sign out of FinTrack"
           aria-label="Logout"
           id="navbar-logout-btn"
@@ -451,7 +418,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           }}
         >
           <LogOut size={16} strokeWidth={2.2} />
-          <span className="hide-on-mobile" style={{ fontWeight: 600, fontSize: '13px' }}>Logout</span>
+          <span>Logout</span>
         </button>
       </div>
     </header>

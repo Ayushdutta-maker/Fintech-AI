@@ -211,7 +211,7 @@ export const BudgetsPage: React.FC<BudgetsPageProps> = ({ selectedMonth }) => {
       </div>
 
       {/* Budgets Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px' }}>
+      <div className="budgets-card-grid">
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
             <div key={`skel-${i}`} className="skeleton-shimmer skeleton-card" style={{ height: '180px' }} />

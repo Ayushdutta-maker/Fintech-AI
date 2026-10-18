@@ -164,3 +164,4 @@ Thumbs.db
 
 # AI / IDE Agent Temp Artifacts
 .gemini/
+agent/

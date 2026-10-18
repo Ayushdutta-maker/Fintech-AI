@@ -11,7 +11,10 @@ interface GoogleSignInButtonProps {
   style?: React.CSSProperties;
 }
 
-const GOOGLE_CLIENT_ID = (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID || '';
+// Fallback to configured Client ID if environment variable is not passed in build
+const GOOGLE_CLIENT_ID =
+  (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID ||
+  '502546664245-gk68fcb8aitp0he39i1dnfpc53mgb5re.apps.googleusercontent.com';
 
 /**
  * Authentic 4-color Google "G" vector icon
@@ -57,8 +60,7 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [isGsiLoaded, setIsGsiLoaded] = useState(false);
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const gsiOverlayRef = useRef<HTMLDivElement | null>(null);
+  const gsiContainerRef = useRef<HTMLDivElement | null>(null);
 
   const updateLoading = (val: boolean) => {
     setIsAuthenticating(val);
@@ -86,32 +88,35 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
 
   credentialHandlerRef.current = handleCredentialResponse;
 
-  // Initialize GIS and mount the transparent interactive overlay
+  // Initialize GIS and render official Google Button
   useEffect(() => {
     let checkInterval: any = null;
     let attempts = 0;
 
     const setupGsi = () => {
-      if (!window.google?.accounts?.id || !gsiOverlayRef.current) {
+      if (!window.google?.accounts?.id || !gsiContainerRef.current) {
+        return false;
+      }
+      if (!GOOGLE_CLIENT_ID) {
         return false;
       }
 
       try {
         window.google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
-          callback: (res) => credentialHandlerRef.current(res),
+          callback: (res: { credential: string }) => credentialHandlerRef.current(res),
           auto_select: false,
           cancel_on_tap_outside: true,
         });
 
         // Clear previous button render
-        gsiOverlayRef.current.innerHTML = '';
+        gsiContainerRef.current.innerHTML = '';
 
         // Calculate responsive width (max 400px enforced by Google API)
-        const containerWidth = gsiOverlayRef.current.parentElement?.offsetWidth || 380;
+        const containerWidth = gsiContainerRef.current.parentElement?.offsetWidth || 380;
         const targetWidth = Math.min(Math.max(containerWidth, 240), 400);
 
-        window.google.accounts.id.renderButton(gsiOverlayRef.current, {
+        window.google.accounts.id.renderButton(gsiContainerRef.current, {
           type: 'standard',
           theme: isDark ? 'filled_black' : 'outline',
           size: 'large',
@@ -121,7 +126,13 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
           logo_alignment: 'left',
         });
 
-        setIsGsiLoaded(true);
+        // Check if Google successfully added its iframe button
+        setTimeout(() => {
+          if (gsiContainerRef.current && (gsiContainerRef.current.querySelector('iframe') || gsiContainerRef.current.children.length > 0)) {
+            setIsGsiLoaded(true);
+          }
+        }, 150);
+
         return true;
       } catch (err) {
         console.warn('Google Identity Services render warning:', err);
@@ -143,193 +154,196 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
     };
   }, [theme, isRegister, isDark]);
 
-  // Fallback programmatic click handler if overlay is missed or pending
+  // Click handler when official GSI button couldn't render or is pending
   const handleFallbackClick = () => {
     if (isAuthenticating) return;
 
-    if (window.google?.accounts?.id) {
+    if (window.google?.accounts?.id && GOOGLE_CLIENT_ID) {
       try {
         window.google.accounts.id.prompt((notification: any) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            console.log('Google One Tap notification:', notification.getNotDisplayedReason?.());
+          if (notification?.isNotDisplayed?.()) {
+            const currentOrigin = window.location.origin;
+            onError(
+              `Google Sign-In is not authorized for "${currentOrigin}". Please add "${currentOrigin}" to Authorized JavaScript Origins in your Google Cloud Console, or use email / Demo Login.`
+            );
           }
         });
       } catch (err: any) {
-        console.warn('Google prompt fallback note:', err);
+        onError(
+          `Google Sign-In notice: ${err?.message || 'Check browser security settings or sign in with email.'}`
+        );
       }
     } else {
-      onError('Google Identity Services is still loading or blocked by your browser extensions. Please try again or sign in with email.');
+      onError(
+        'Google Identity Services is loading or blocked by your browser extensions. Please sign in with email or click Demo Login.'
+      );
     }
   };
 
   return (
     <div 
-      ref={containerRef}
       style={{
         position: 'relative',
         width: '100%',
         minHeight: '46px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
         ...style
       }}
     >
-      {/* 1. Ultra-Luxury Styled Visual Custom Button */}
-      <button
-        type="button"
-        onClick={handleFallbackClick}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        disabled={isAuthenticating}
-        className="google-btn-custom"
+      {/* 1. Official Google Rendered Button (Visible once loaded) */}
+      <div
+        ref={gsiContainerRef}
         style={{
           width: '100%',
-          height: '46px',
-          display: 'flex',
+          display: isGsiLoaded ? 'flex' : 'none',
+          justifyContent: 'center',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 16px',
-          borderRadius: '10px',
-          border: isDark
-            ? isHovered
-              ? '1px solid rgba(16, 185, 129, 0.55)'
-              : '1px solid rgba(255, 255, 255, 0.14)'
-            : isHovered
-              ? '1px solid var(--green-600)'
-              : '1px solid #E2E8F0',
-          background: isDark
-            ? isHovered
-              ? 'linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.04) 100%)'
-              : 'linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)'
-            : isHovered
-              ? 'linear-gradient(180deg, #FFFFFF 0%, #F0FDF4 100%)'
-              : 'linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)',
-          boxShadow: isDark
-            ? isHovered
-              ? '0 6px 20px -2px rgba(16, 185, 129, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.12)'
-              : '0 2px 6px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.07)'
-            : isHovered
-              ? '0 6px 18px -2px rgba(5, 150, 105, 0.16), 0 2px 4px rgba(0, 0, 0, 0.04)'
-              : '0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03)',
-          transform: isHovered && !isAuthenticating ? 'translateY(-1px)' : 'none',
-          transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-          cursor: isAuthenticating ? 'not-allowed' : 'pointer',
-          outline: 'none',
-          position: 'relative',
-          userSelect: 'none'
+          minHeight: '44px'
         }}
-      >
-        {/* Left Side: Brand Icon & Text */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {isAuthenticating ? (
-            <div style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: isDark ? 'rgba(16, 185, 129, 0.15)' : 'var(--green-100)'
-            }}>
-              <Loader2 
-                size={16} 
-                color="var(--green-600)" 
-                style={{ animation: 'spin 0.8s linear infinite' }} 
-              />
-            </div>
-          ) : (
-            <div style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '50%',
-              background: '#FFFFFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.12)',
-              flexShrink: 0
-            }}>
-              <GoogleLogoIcon size={17} />
-            </div>
-          )}
+      />
 
-          <div style={{ textAlign: 'left' }}>
-            <span style={{
-              display: 'block',
-              fontSize: '13.5px',
-              fontWeight: 700,
-              color: 'var(--text)',
-              letterSpacing: '-0.2px',
-              lineHeight: 1.2
-            }}>
-              {isAuthenticating 
-                ? 'Authenticating with Google...' 
-                : isRegister 
-                  ? 'Sign up with Google' 
-                  : 'Continue with Google'}
-            </span>
-          </div>
-        </div>
-
-        {/* Right Side: Trust & Security Indicators */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '5px',
-            padding: '3px 7px',
-            borderRadius: '6px',
-            background: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
-            border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.05)',
-          }}>
-            <span style={{
-              width: '6px',
-              height: '6px',
-              borderRadius: '50%',
-              background: isGsiLoaded ? '#10B981' : '#F59E0B',
-              boxShadow: isGsiLoaded ? '0 0 6px #10B981' : 'none',
-              display: 'inline-block'
-            }} />
-            <span style={{
-              fontSize: '10.5px',
-              fontWeight: 700,
-              color: 'var(--muted)',
-              letterSpacing: '0.4px',
-              textTransform: 'uppercase'
-            }}>
-              OAuth 2.0
-            </span>
-          </div>
-
-          <div style={{
-            color: isHovered ? 'var(--green-600)' : 'var(--muted)',
-            transition: 'color 0.2s ease, transform 0.2s ease',
-            transform: isHovered ? 'translateX(2px)' : 'none',
-            display: 'flex',
-            alignItems: 'center'
-          }}>
-            <ArrowRight size={14} />
-          </div>
-        </div>
-      </button>
-
-      {/* 2. Interactive Google GIS Iframe Overlay (Stretched across custom button) */}
-      {!isAuthenticating && (
-        <div
-          ref={gsiOverlayRef}
-          className="google-gsi-overlay"
-          aria-hidden="true"
+      {/* 2. Custom Fallback Button (Visible when official GSI button has not loaded or origin is unauthorized) */}
+      {!isGsiLoaded && (
+        <button
+          type="button"
+          onClick={handleFallbackClick}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          disabled={isAuthenticating}
+          className="google-btn-custom"
           style={{
-            position: 'absolute',
-            inset: 0,
-            opacity: 0.001,
-            zIndex: 10,
-            cursor: 'pointer',
-            overflow: 'hidden',
+            width: '100%',
+            height: '46px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            pointerEvents: 'auto'
+            justifyContent: 'space-between',
+            padding: '0 16px',
+            borderRadius: '10px',
+            border: isDark
+              ? isHovered
+                ? '1px solid rgba(16, 185, 129, 0.55)'
+                : '1px solid rgba(255, 255, 255, 0.14)'
+              : isHovered
+                ? '1px solid var(--green-600)'
+                : '1px solid #E2E8F0',
+            background: isDark
+              ? isHovered
+                ? 'linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.04) 100%)'
+                : 'linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)'
+              : isHovered
+                ? 'linear-gradient(180deg, #FFFFFF 0%, #F0FDF4 100%)'
+                : 'linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)',
+            boxShadow: isDark
+              ? isHovered
+                ? '0 6px 20px -2px rgba(16, 185, 129, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.12)'
+                : '0 2px 6px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.07)'
+              : isHovered
+                ? '0 6px 18px -2px rgba(5, 150, 105, 0.16), 0 2px 4px rgba(0, 0, 0, 0.04)'
+                : '0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03)',
+            transform: isHovered && !isAuthenticating ? 'translateY(-1px)' : 'none',
+            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            cursor: isAuthenticating ? 'not-allowed' : 'pointer',
+            outline: 'none',
+            position: 'relative',
+            userSelect: 'none'
           }}
-        />
+        >
+          {/* Left Side: Brand Icon & Text */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {isAuthenticating ? (
+              <div style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: isDark ? 'rgba(16, 185, 129, 0.15)' : 'var(--green-100)'
+              }}>
+                <Loader2 
+                  size={16} 
+                  color="var(--green-600)" 
+                  style={{ animation: 'spin 0.8s linear infinite' }} 
+                />
+              </div>
+            ) : (
+              <div style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                background: '#FFFFFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.12)',
+                flexShrink: 0
+              }}>
+                <GoogleLogoIcon size={17} />
+              </div>
+            )}
+
+            <div style={{ textAlign: 'left' }}>
+              <span style={{
+                display: 'block',
+                fontSize: '13.5px',
+                fontWeight: 700,
+                color: 'var(--text)',
+                letterSpacing: '-0.2px',
+                lineHeight: 1.2
+              }}>
+                {isAuthenticating 
+                  ? 'Authenticating with Google...' 
+                  : isRegister 
+                    ? 'Sign up with Google' 
+                    : 'Continue with Google'}
+              </span>
+            </div>
+          </div>
+
+          {/* Right Side: Trust & Security Indicators */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              padding: '3px 7px',
+              borderRadius: '6px',
+              background: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.05)',
+            }}>
+              <span style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: isGsiLoaded ? '#10B981' : '#F59E0B',
+                boxShadow: isGsiLoaded ? '0 0 6px #10B981' : 'none',
+                display: 'inline-block'
+              }} />
+              <span style={{
+                fontSize: '10.5px',
+                fontWeight: 700,
+                color: 'var(--muted)',
+                letterSpacing: '0.4px',
+                textTransform: 'uppercase'
+              }}>
+                OAuth 2.0
+              </span>
+            </div>
+
+            <div style={{
+              color: isHovered ? 'var(--green-600)' : 'var(--muted)',
+              transition: 'color 0.2s ease, transform 0.2s ease',
+              transform: isHovered ? 'translateX(2px)' : 'none',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <ArrowRight size={14} />
+            </div>
+          </div>
+        </button>
       )}
     </div>
   );

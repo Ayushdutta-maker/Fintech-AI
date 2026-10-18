@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { api, Alert, User } from '../lib/api';
 import { useTheme, CurrencyCode } from '../lib/ThemeContext';
+import { supabase } from '../lib/supabase';
 
 interface NavbarProps {
   user: User | null;
@@ -86,15 +87,89 @@ export const Navbar: React.FC<NavbarProps> = ({
     window.open(url, '_blank');
   };
 
-  // Generate month options (past 12 months)
-  const monthOptions = [];
-  const now = new Date();
-  for (let i = 0; i < 12; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    const label = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-    monthOptions.push({ val, label });
-  }
+  // Dynamic Month Options:
+  // Dynamically expands as time passes since user joined / recorded first transaction
+  const [earliestMonth, setEarliestMonth] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchEarliestDate = async () => {
+      try {
+        const { data } = await supabase
+          .from('transactions')
+          .select('transaction_date')
+          .order('transaction_date', { ascending: true })
+          .limit(1);
+
+        if (data && data.length > 0 && data[0].transaction_date) {
+          setEarliestMonth(data[0].transaction_date.slice(0, 7));
+        }
+      } catch {
+        // ignore
+      }
+    };
+    fetchEarliestDate();
+  }, [user]);
+
+  const monthOptions = React.useMemo(() => {
+    const now = new Date();
+    // Allow looking forward up to 2 months for upcoming bills and budget planning
+    const latestDate = new Date(now.getFullYear(), now.getMonth() + 2, 1);
+
+    // Baseline: at least 24 months in the past so any user has historical backfill room
+    let earliestDate = new Date(now.getFullYear(), now.getMonth() - 24, 1);
+
+    // If user was created earlier, expand the timeline back to their active registration date
+    if (user?.created_at) {
+      const userCreatedDate = new Date(user.created_at);
+      if (!isNaN(userCreatedDate.getTime()) && userCreatedDate < earliestDate) {
+        earliestDate = new Date(userCreatedDate.getFullYear(), userCreatedDate.getMonth(), 1);
+      }
+    }
+
+    // If transactions exist from an earlier date, expand back to that transaction month
+    if (earliestMonth) {
+      const [eYear, eMonth] = earliestMonth.split('-').map(Number);
+      if (!isNaN(eYear) && !isNaN(eMonth)) {
+        const txEarliestDate = new Date(eYear, eMonth - 1, 1);
+        if (txEarliestDate < earliestDate) {
+          earliestDate = txEarliestDate;
+        }
+      }
+    }
+
+    const totalMonths =
+      (latestDate.getFullYear() - earliestDate.getFullYear()) * 12 +
+      (latestDate.getMonth() - earliestDate.getMonth()) + 1;
+
+    const options: { val: string; label: string }[] = [];
+    for (let i = 0; i < totalMonths; i++) {
+      const d = new Date(latestDate.getFullYear(), latestDate.getMonth() - i, 1);
+      const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const isCurrentMonth = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+      const isFuture = d > now;
+      let label = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      if (isCurrentMonth) {
+        label += ' (Current)';
+      } else if (isFuture) {
+        label += ' (Upcoming)';
+      }
+      options.push({ val, label });
+    }
+
+    // Ensure currently selected month is always present in list
+    if (selectedMonth && !options.some(o => o.val === selectedMonth)) {
+      const [sYear, sMonth] = selectedMonth.split('-').map(Number);
+      if (!isNaN(sYear) && !isNaN(sMonth)) {
+        const sDate = new Date(sYear, sMonth - 1, 1);
+        options.push({
+          val: selectedMonth,
+          label: sDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        });
+      }
+    }
+
+    return options;
+  }, [user, earliestMonth, selectedMonth]);
 
   const currencies: CurrencyCode[] = ['INR', 'USD', 'EUR', 'GBP'];
 

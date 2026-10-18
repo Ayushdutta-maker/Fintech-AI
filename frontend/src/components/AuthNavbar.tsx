@@ -28,52 +28,37 @@ export const AuthNavbar: React.FC<AuthNavbarProps> = ({
 
   return (
     <>
-      <header 
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 40,
-          padding: '14px 28px',
-          background: 'var(--glass-bg)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          borderBottom: '1px solid var(--border)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          transition: 'background 0.2s ease, border-color 0.2s ease'
-        }}
-      >
+      <header className="auth-navbar">
         {/* Left: Brand Identity */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
           <div style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '12px',
+            width: '36px',
+            height: '36px',
+            borderRadius: '10px',
             background: 'linear-gradient(135deg, var(--green-800) 0%, var(--green-600) 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: 'white',
-            boxShadow: 'var(--shadow-emerald)'
+            boxShadow: 'var(--shadow-emerald)',
+            flexShrink: 0
           }}>
-            <TrendingUp size={20} strokeWidth={2.6} />
+            <TrendingUp size={18} strokeWidth={2.6} />
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.3px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.3px', whiteSpace: 'nowrap' }}>
                 FinTrack <span style={{ color: 'var(--green-600)' }}>AI</span>
               </span>
               <span style={{
-                fontSize: '10px',
+                fontSize: '9.5px',
                 fontWeight: 800,
                 background: 'var(--green-100)',
                 color: 'var(--green-900)',
-                padding: '2px 6px',
-                borderRadius: '6px',
-                border: '1px solid rgba(16, 185, 129, 0.25)'
+                padding: '2px 5px',
+                borderRadius: '5px',
+                border: '1px solid rgba(16, 185, 129, 0.25)',
+                whiteSpace: 'nowrap'
               }}>
                 v2.4 3D
               </span>
@@ -84,8 +69,8 @@ export const AuthNavbar: React.FC<AuthNavbarProps> = ({
           </div>
         </div>
 
-        {/* Center: System Status & Highlights */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }} className="hide-on-mobile">
+        {/* Center: System Status & Highlights (Desktop only) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }} className="hide-on-mobile">
           <button
             onClick={() => setShowFeatureModal('features')}
             style={{
@@ -147,20 +132,20 @@ export const AuthNavbar: React.FC<AuthNavbarProps> = ({
         </div>
 
         {/* Right: Actions & Theme Toggle */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           {/* Theme switch button */}
           <button
             type="button"
             onClick={toggleTheme}
             className="btn-icon"
-            style={{ width: '36px', height: '36px' }}
+            style={{ width: '34px', height: '34px', minWidth: '34px' }}
             title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
             aria-label="Toggle theme"
           >
             {theme === 'light' ? (
-              <Moon size={17} color="var(--text)" />
+              <Moon size={16} color="var(--text)" />
             ) : (
-              <Sun size={17} color="var(--warning)" />
+              <Sun size={16} color="var(--warning)" />
             )}
           </button>
 
@@ -169,7 +154,7 @@ export const AuthNavbar: React.FC<AuthNavbarProps> = ({
             type="button"
             onClick={() => onToggleMode(!isRegister)}
             className="btn btn-primary"
-            style={{ padding: '6px 14px', fontSize: '12.5px', minHeight: '34px' }}
+            style={{ padding: '6px 12px', fontSize: '12px', minHeight: '34px', whiteSpace: 'nowrap' }}
           >
             <span>{isRegister ? 'Sign In' : 'Get Started'}</span>
             <ArrowRight size={14} />

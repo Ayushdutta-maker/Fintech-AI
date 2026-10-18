@@ -16,5 +16,7 @@ class Settings:
     CORS_ORIGINS: str = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:5174,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:5174,http://127.0.0.1:3000")
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
     GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
+    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "https://xivyidcovjckojhvxxyw.supabase.co")
+    SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "sb_publishable_bA21n8WTnjmuBxyqcqT2OQ_2VGzvBYG")
 
 settings = Settings()

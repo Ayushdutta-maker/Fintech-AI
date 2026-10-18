@@ -112,21 +112,24 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const monthOptions = React.useMemo(() => {
     const now = new Date();
-    // Allow looking forward up to 2 months for upcoming bills and budget planning
-    const latestDate = new Date(now.getFullYear(), now.getMonth() + 2, 1);
+    // Latest date is current active month
+    const latestDate = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    // Baseline: at least 24 months in the past so any user has historical backfill room
-    let earliestDate = new Date(now.getFullYear(), now.getMonth() - 24, 1);
+    // Earliest date starts from the month the user created their account
+    let earliestDate = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    // If user was created earlier, expand the timeline back to their active registration date
     if (user?.created_at) {
       const userCreatedDate = new Date(user.created_at);
-      if (!isNaN(userCreatedDate.getTime()) && userCreatedDate < earliestDate) {
+      if (!isNaN(userCreatedDate.getTime())) {
         earliestDate = new Date(userCreatedDate.getFullYear(), userCreatedDate.getMonth(), 1);
+        // Safety clamp: cannot be in the future relative to current month
+        if (earliestDate > latestDate) {
+          earliestDate = new Date(latestDate);
+        }
       }
     }
 
-    // If transactions exist from an earlier date, expand back to that transaction month
+    // If transactions exist from an earlier date (e.g. user imported past statements), include them
     if (earliestMonth) {
       const [eYear, eMonth] = earliestMonth.split('-').map(Number);
       if (!isNaN(eYear) && !isNaN(eMonth)) {
@@ -146,12 +149,9 @@ export const Navbar: React.FC<NavbarProps> = ({
       const d = new Date(latestDate.getFullYear(), latestDate.getMonth() - i, 1);
       const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       const isCurrentMonth = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-      const isFuture = d > now;
       let label = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-      if (isCurrentMonth) {
+      if (isCurrentMonth && totalMonths > 1) {
         label += ' (Current)';
-      } else if (isFuture) {
-        label += ' (Upcoming)';
       }
       options.push({ val, label });
     }
@@ -161,7 +161,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       const [sYear, sMonth] = selectedMonth.split('-').map(Number);
       if (!isNaN(sYear) && !isNaN(sMonth)) {
         const sDate = new Date(sYear, sMonth - 1, 1);
-        options.push({
+        options.unshift({
           val: selectedMonth,
           label: sDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
         });

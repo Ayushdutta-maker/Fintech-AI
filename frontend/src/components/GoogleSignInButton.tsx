@@ -194,7 +194,7 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
           if (notification?.isNotDisplayed?.()) {
             const currentOrigin = window.location.origin;
             onError(
-              `Google Sign-In is not authorized for "${currentOrigin}". Please add "${currentOrigin}" to Authorized JavaScript Origins in your Google Cloud Console, or use email / Demo Login.`
+              `Google Sign-In is not authorized for "${currentOrigin}". Please add "${currentOrigin}" to Authorized JavaScript Origins in your Google Cloud Console, or use email.`
             );
           }
         });
@@ -205,7 +205,7 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
       }
     } else {
       onError(
-        'Google Identity Services is loading or blocked by your browser extensions. Please sign in with email or click Demo Login.'
+        'Google Identity Services is loading or blocked by your browser extensions. Please sign in with email.'
       );
     }
   };

@@ -18,7 +18,7 @@ import {
   Zap,
   BarChart3
 } from 'lucide-react';
-import { api, User as UserType, setToken, setStoredUser } from '../lib/api';
+import { api, User as UserType } from '../lib/api';
 import { Canvas3DBackground } from '../components/Canvas3DBackground';
 import { NeumorphicFinanceCube } from '../components/NeumorphicFinanceCube';
 import { AuthNavbar } from '../components/AuthNavbar';
@@ -109,39 +109,10 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
       }
     } catch (err: any) {
       if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
-        setError('Unable to connect to backend server. You can sign in with Google or click "⚡ Quick Demo Login" below to explore.');
+        setError('Unable to connect to backend server. Please sign in with Google or verify backend connection.');
       } else {
         setError(err.message || 'Authentication failed. Please check your credentials.');
       }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDemoLogin = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      try {
-        const res = await api.login('demo@fintrack.ai', 'DemoFinTrack123!');
-        onAuthSuccess(res.user);
-        return;
-      } catch {
-        const res = await api.register('demo@fintrack.ai', 'DemoFinTrack123!', 'Alex Morgan', 'INR');
-        onAuthSuccess(res.user);
-        return;
-      }
-    } catch {
-      const mockUser: UserType = {
-        id: 'demo-user-001',
-        email: 'demo@fintrack.ai',
-        display_name: 'Alex Morgan',
-        default_currency: 'INR',
-        created_at: new Date().toISOString()
-      };
-      setToken('demo-jwt-token-' + Date.now());
-      setStoredUser(mockUser);
-      onAuthSuccess(mockUser);
     } finally {
       setIsLoading(false);
     }
@@ -577,32 +548,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
                       <ArrowRight size={16} />
                     </>
                   )}
-                </button>
-
-                {/* Instant Demo Access Button */}
-                <button
-                  type="button"
-                  onClick={handleDemoLogin}
-                  disabled={isLoading || isGoogleLoading}
-                  className="btn btn-secondary"
-                  style={{
-                    width: '100%',
-                    padding: '11px',
-                    fontSize: '13.5px',
-                    fontWeight: 600,
-                    borderRadius: 'var(--radius-sm)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    marginTop: '12px',
-                    background: 'var(--surface-subtle)',
-                    border: '1px solid var(--border)',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <Zap size={15} color="var(--green-600)" />
-                  <span>⚡ Quick Demo Login (Instant Access)</span>
                 </button>
               </form>
 

@@ -106,9 +106,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button 
             type="button"
             onClick={onToggleMobileMenu}
-            className="btn-icon"
+            className="btn-icon mobile-menu-btn"
             aria-label="Open navigation menu"
-            style={{ display: 'none' }}
             id="mobile-nav-toggle"
           >
             <Menu size={20} />

@@ -108,7 +108,11 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
         onAuthSuccess(res.user);
       }
     } catch (err: any) {
-      setError(err.message || 'Authentication failed. Please check your credentials.');
+      if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
+        setError('Unable to connect to backend server. You can sign in with Google or click "⚡ Quick Demo Login" below to explore.');
+      } else {
+        setError(err.message || 'Authentication failed. Please check your credentials.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -162,15 +166,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
       />
 
       {/* 3. Main Hero & 3D Interactive Centerpiece */}
-      <main style={{
-        flex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '100px 24px 40px',
-        position: 'relative',
-        zIndex: 10
-      }}>
+      <main className="auth-main">
         <div style={{
           maxWidth: '1060px',
           width: '100%',
@@ -248,20 +244,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
           </div>
 
           {/* Right Card: Glassmorphic & Neumorphic Authentication Card */}
-          <div style={{
-            flex: '1 1 380px',
-            maxWidth: '460px',
-            width: '100%',
-            background: 'var(--surface)',
-            borderRadius: 'var(--radius-xl)',
-            boxShadow: 'var(--card-shadow-3d)',
-            border: '1px solid var(--border)',
-            overflow: 'hidden',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            position: 'relative',
-            transition: 'box-shadow 0.25s ease'
-          }}>
+          <div className="auth-card">
             {/* Luminous Top Accent Line */}
             <div style={{
               height: '4px',
@@ -269,7 +252,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
               background: 'linear-gradient(90deg, var(--green-800) 0%, var(--green-600) 50%, #34D399 100%)'
             }} />
 
-            <div style={{ padding: '32px 28px 24px' }}>
+            <div className="auth-card-body">
               {/* Header Title inside card */}
               <div style={{ marginBottom: '22px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
@@ -286,13 +269,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
                     {isRegister ? 'New Account' : 'Welcome Back'}
                   </span>
                 </div>
-                <h2 style={{
-                  fontSize: '24px',
-                  fontWeight: 800,
-                  letterSpacing: '-0.5px',
-                  color: 'var(--text)',
-                  lineHeight: 1.2
-                }}>
+                <h2 className="auth-header-title">
                   {isRegister ? 'Create your workspace' : 'Sign in to FinTrack AI'}
                 </h2>
                 <p style={{

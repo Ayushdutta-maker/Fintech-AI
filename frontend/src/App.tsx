@@ -9,6 +9,7 @@ import { InsightsPage } from './pages/InsightsPage';
 import { AuthPage } from './pages/AuthPage';
 import { AddTransactionModal } from './components/AddTransactionModal';
 import { ImportCsvModal } from './components/ImportCsvModal';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { 
   getToken, 
   getStoredUser, 
@@ -154,6 +155,16 @@ export function App() {
           />
         )}
       </main>
+
+      {/* Mobile Glassmorphic Bottom Navigation Bar */}
+      <MobileBottomNav
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onOpenAddTransaction={() => {
+          setTxToEdit(null);
+          setIsAddTxOpen(true);
+        }}
+      />
 
       {/* Global Modals */}
       <AddTransactionModal

@@ -458,109 +458,164 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         {/* Left Column: Recent Transactions Table */}
         <div className="card">
           <div className="card-header">
-            <div>
+            <div style={{ minWidth: 0, flex: 1 }}>
               <h2 className="card-title">Recent Transactions</h2>
               <p className="card-subtitle">Live activity stream</p>
             </div>
             <button 
               onClick={() => onNavigate('transactions')}
               className="btn btn-secondary"
-              style={{ padding: '5px 12px', fontSize: '12px', minHeight: '32px' }}
+              style={{ padding: '5px 12px', fontSize: '12px', minHeight: '32px', flexShrink: 0 }}
             >
               <span>View All</span>
               <ChevronRight size={14} />
             </button>
           </div>
 
-          <div className="table-container">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Description</th>
-                  <th>Category</th>
-                  <th>Date</th>
-                  <th className="align-right">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {summary?.recent_transactions && summary.recent_transactions.length > 0 ? (
-                  summary.recent_transactions.map((tx: Transaction) => {
-                    const isIncome = tx.transaction_type === 'income';
-                    return (
-                      <tr key={tx.id}>
-                        <td>
-                          <div style={{ fontWeight: 600, color: 'var(--text)' }}>
+          {summary?.recent_transactions && summary.recent_transactions.length > 0 ? (
+            <>
+              {/* Desktop 4-column Table (hidden on mobile <= 640px) */}
+              <div className="desktop-tx-table table-container">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Description</th>
+                      <th>Category</th>
+                      <th>Date</th>
+                      <th className="align-right">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {summary.recent_transactions.map((tx: Transaction) => {
+                      const isIncome = tx.transaction_type === 'income';
+                      return (
+                        <tr key={tx.id}>
+                          <td>
+                            <div style={{ fontWeight: 600, color: 'var(--text)' }}>
+                              {tx.merchant || tx.note || 'Transaction'}
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                              {tx.account_name || 'Account'}
+                            </div>
+                          </td>
+                          <td>
+                            <span 
+                              className="badge"
+                              style={{
+                                backgroundColor: tx.category?.color ? `${tx.category.color}20` : 'var(--surface-subtle)',
+                                color: tx.category?.color || 'var(--text)',
+                                border: `1px solid ${tx.category?.color ? `${tx.category.color}40` : 'var(--border)'}`
+                              }}
+                            >
+                              {tx.category?.name || 'General'}
+                            </span>
+                          </td>
+                          <td style={{ color: 'var(--muted)', fontSize: '12px' }}>
+                            {new Date(tx.transaction_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </td>
+                          <td className="align-right font-tabular" style={{ fontWeight: 700, color: isIncome ? 'var(--green-600)' : 'var(--text)' }}>
+                            {isIncome ? '+' : '-'}{formatCurrency(tx.amount)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Transaction Feed (shown on mobile <= 640px) */}
+              <div className="mobile-tx-list">
+                {summary.recent_transactions.map((tx: Transaction) => {
+                  const isIncome = tx.transaction_type === 'income';
+                  return (
+                    <div 
+                      key={tx.id} 
+                      className="mobile-tx-item"
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
+                        <div 
+                          className="mobile-tx-icon"
+                          style={{
+                            background: tx.category?.color ? `${tx.category.color}18` : 'var(--surface-subtle)',
+                            borderColor: tx.category?.color ? `${tx.category.color}35` : 'var(--border)'
+                          }}
+                        >
+                          {isIncome ? (
+                            <ArrowDownLeft size={17} color="var(--green-600)" />
+                          ) : (
+                            <ArrowUpRight size={17} color={tx.category?.color || 'var(--expense)'} />
+                          )}
+                        </div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div className="mobile-tx-title">
                             {tx.merchant || tx.note || 'Transaction'}
                           </div>
-                          <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
-                            {tx.account_name || 'Account'}
+                          <div className="mobile-tx-meta">
+                            <span>{tx.category?.name || 'General'}</span>
+                            <span>•</span>
+                            <span>{new Date(tx.transaction_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                           </div>
-                        </td>
-                        <td>
-                          <span 
-                            className="badge"
-                            style={{
-                              backgroundColor: tx.category?.color ? `${tx.category.color}20` : 'var(--surface-subtle)',
-                              color: tx.category?.color || 'var(--text)',
-                              border: `1px solid ${tx.category?.color ? `${tx.category.color}40` : 'var(--border)'}`
-                            }}
-                          >
-                            {tx.category?.name || 'General'}
-                          </span>
-                        </td>
-                        <td style={{ color: 'var(--muted)', fontSize: '12px' }}>
-                          {new Date(tx.transaction_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </td>
-                        <td className="align-right font-tabular" style={{ fontWeight: 700, color: isIncome ? 'var(--green-600)' : 'var(--text)' }}>
-                          {isIncome ? '+' : '-'}{formatCurrency(tx.amount)}
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={4} style={{ textAlign: 'center', padding: '36px 16px' }}>
-                      <div className="empty-state-card" style={{ border: 'none', background: 'transparent', padding: '12px' }}>
-                        <Receipt size={32} color="var(--muted)" />
-                        <div className="empty-state-title" style={{ fontSize: '14px' }}>No transactions recorded yet</div>
-                        <p className="empty-state-desc" style={{ fontSize: '12px' }}>
-                          Start tracking your cash flow by recording your first transaction.
-                        </p>
-                        <button 
-                          onClick={onOpenAddTransaction}
-                          className="btn btn-primary"
-                          style={{ padding: '6px 14px', fontSize: '12.5px', marginTop: '6px' }}
-                        >
-                          <PlusCircle size={15} />
-                          <span>Add Transaction</span>
-                        </button>
+                        </div>
                       </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+
+                      <div className="mobile-tx-amount font-tabular" style={{ color: isIncome ? 'var(--green-600)' : 'var(--text)' }}>
+                        {isIncome ? '+' : '-'}{formatCurrency(tx.amount)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            /* Clean Empty State without overflowing table headers */
+            <div className="empty-state-card" style={{ border: 'none', background: 'transparent', padding: '28px 14px', textAlign: 'center' }}>
+              <div style={{
+                width: '46px',
+                height: '46px',
+                borderRadius: '50%',
+                background: 'var(--surface-subtle)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 10px',
+                border: '1px solid var(--border)'
+              }}>
+                <Receipt size={22} color="var(--muted)" />
+              </div>
+              <div className="empty-state-title" style={{ fontSize: '14.5px', fontWeight: 700 }}>No transactions recorded yet</div>
+              <p className="empty-state-desc" style={{ fontSize: '12px', maxWidth: '300px', margin: '4px auto 14px', color: 'var(--muted)' }}>
+                Start tracking your cash flow by recording your first transaction.
+              </p>
+              <button 
+                onClick={onOpenAddTransaction}
+                className="btn btn-primary"
+                style={{ padding: '8px 18px', fontSize: '12.5px', margin: '0 auto' }}
+              >
+                <PlusCircle size={15} />
+                <span>Add Transaction</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Right Column: Budget Progress + Upcoming Bills */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minWidth: 0, width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
           {/* Budget Utilization Progress Rows */}
           <div className="card">
             <div className="card-header">
-              <div>
+              <div style={{ minWidth: 0, flex: 1 }}>
                 <h2 className="card-title">Budget Allocation</h2>
                 <p className="card-subtitle">Threshold monitoring</p>
               </div>
               <button 
                 onClick={() => onNavigate('budgets')}
-                style={{ background: 'none', border: 'none', color: 'var(--green-600)', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
+                style={{ background: 'none', border: 'none', color: 'var(--green-600)', fontSize: '12px', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}
               >
                 + Set Budget
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', minWidth: 0 }}>
               {budgets.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '20px', color: 'var(--muted)', fontSize: '13px' }}>
                   No active budgets for {selectedMonth}.
@@ -573,12 +628,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   const barColor = isExceeded ? 'var(--expense)' : isWarning ? 'var(--warning)' : 'var(--green-600)';
 
                   return (
-                    <div key={b.id} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-                        <span style={{ fontWeight: 600, color: 'var(--text)' }}>
+                    <div key={b.id} style={{ display: 'flex', flexDirection: 'column', gap: '6px', minWidth: 0, width: '100%' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontSize: '13px', gap: '8px', flexWrap: 'wrap' }}>
+                        <span style={{ fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {b.category?.name || 'Overall'}
                         </span>
-                        <span className="font-tabular" style={{ fontWeight: 700, color: barColor }}>
+                        <span className="font-tabular" style={{ fontWeight: 700, color: barColor, fontSize: '12px', flexShrink: 0 }}>
                           {formatCurrency(b.actual_spent)} / {formatCurrency(b.limit_amount)} ({pct}%)
                         </span>
                       </div>
@@ -598,19 +653,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           {/* Upcoming Bills Card */}
           <div className="card">
             <div className="card-header">
-              <div>
+              <div style={{ minWidth: 0, flex: 1 }}>
                 <h2 className="card-title">Upcoming Bills</h2>
                 <p className="card-subtitle">Scheduled obligations</p>
               </div>
               <button 
                 onClick={() => onNavigate('bills')}
-                style={{ background: 'none', border: 'none', color: 'var(--green-600)', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
+                style={{ background: 'none', border: 'none', color: 'var(--green-600)', fontSize: '12px', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}
               >
                 View all
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', minWidth: 0 }}>
               {summary?.upcoming_bills && summary.upcoming_bills.length > 0 ? (
                 summary.upcoming_bills.map((bill: Bill) => (
                   <div 
@@ -622,17 +677,21 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                       padding: '11px 14px',
                       background: 'var(--surface-subtle)',
                       borderRadius: 'var(--radius-sm)',
-                      border: '1px solid var(--border)'
+                      border: '1px solid var(--border)',
+                      gap: '10px',
+                      minWidth: 0,
+                      width: '100%',
+                      boxSizing: 'border-box'
                     }}
                   >
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--text)' }}>{bill.name}</div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{bill.name}</div>
                       <div style={{ fontSize: '11.5px', color: 'var(--muted)', marginTop: '2px' }}>
                         Due: {new Date(bill.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span className="font-tabular" style={{ fontWeight: 800, fontSize: '13.5px', color: 'var(--text)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                      <span className="font-tabular" style={{ fontWeight: 800, fontSize: '13px', color: 'var(--text)' }}>
                         {formatCurrency(bill.expected_amount)}
                       </span>
                       <button

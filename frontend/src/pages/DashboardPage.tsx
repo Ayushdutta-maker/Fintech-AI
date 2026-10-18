@@ -36,7 +36,9 @@ import {
   DashboardSummary, 
   CategorySpendingItem, 
   BudgetVsActualItem, 
-  Budget 
+  Budget,
+  Transaction,
+  Bill
 } from '../lib/api';
 import { useTheme } from '../lib/ThemeContext';
 import { useToast } from '../lib/ToastContext';
@@ -482,7 +484,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               </thead>
               <tbody>
                 {summary?.recent_transactions && summary.recent_transactions.length > 0 ? (
-                  summary.recent_transactions.map((tx) => {
+                  summary.recent_transactions.map((tx: Transaction) => {
                     const isIncome = tx.transaction_type === 'income';
                     return (
                       <tr key={tx.id}>
@@ -610,7 +612,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {summary?.upcoming_bills && summary.upcoming_bills.length > 0 ? (
-                summary.upcoming_bills.map((bill) => (
+                summary.upcoming_bills.map((bill: Bill) => (
                   <div 
                     key={bill.id} 
                     style={{ 

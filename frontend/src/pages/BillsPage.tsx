@@ -53,7 +53,7 @@ export const BillsPage: React.FC = () => {
   useEffect(() => {
     fetchBills();
     api.getCategories('bill').then(setCategories).catch(() => {});
-    api.getAccounts().then(accs => {
+    api.getAccounts().then((accs: Account[]) => {
       setAccounts(accs);
       if (accs.length > 0) setAccountId(accs[0].id);
     }).catch(() => {});
